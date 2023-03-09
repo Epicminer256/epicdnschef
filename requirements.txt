@@ -1,2 +1,2 @@
--i https://pypi.org/simple
-dnslib==0.9.10
+art==5.8
+dnslib==0.9.23

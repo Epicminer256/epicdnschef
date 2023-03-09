@@ -6,7 +6,11 @@
 # for the latest version and documentation. Please forward all issues and
 # concerns to iphelix [at] thesprawl.org.
 
-DNSCHEF_VERSION = "0.4"
+DNSCHEF_NAME = "epic-dnschef"
+# Version number formatting
+# Everything before the "R" is the original version this fork is based off
+# Everything after the "R" is the revision version
+DNSCHEF_VERSION = "0.4R1"
 
 # Copyright (C) 2019 Peter Kacherginsky, Marcello Salvati
 # All rights reserved.
@@ -39,6 +43,8 @@ from configparser import ConfigParser
 
 from dnslib import *
 from ipaddress import ip_address
+
+from art import text2art
 
 import logging
 import threading
@@ -420,8 +426,8 @@ def start_cooking(interface, nametodns, nameservers, tcp=False, ipv6=False, port
         else:
             server = ThreadedUDPServer((interface, int(port)), UDPHandler, nametodns, nameservers, ipv6, log)
 
-        # Start a thread with the server -- that thread will then start
-        # more threads for each request
+        # Start a thread with the server 
+        # That thread will then start more threads for each request
         server_thread = threading.Thread(target=server.serve_forever)
 
         # Exit the server thread when the main thread terminates
@@ -441,17 +447,11 @@ def start_cooking(interface, nametodns, nameservers, tcp=False, ipv6=False, port
 
 
 if __name__ == "__main__":
-
-    header  = "          _                _          __  \n"
-    header += "         | | version %s  | |        / _| \n" % DNSCHEF_VERSION
-    header += "       __| |_ __  ___  ___| |__   ___| |_ \n"
-    header += "      / _` | '_ \/ __|/ __| '_ \ / _ \  _|\n"
-    header += "     | (_| | | | \__ \ (__| | | |  __/ |  \n"
-    header += "      \__,_|_| |_|___/\___|_| |_|\___|_|  \n"
-    header += "                   iphelix@thesprawl.org  \n"
+    def genHeader(name):
+        return text2art(name, font="tarty1")+"\n"+text2art("Ver: "+DNSCHEF_VERSION, font="tarty4")+"\n"
 
     # Parse command line arguments
-    parser = ArgumentParser(usage = "dnschef.py [options]:\n" + header, description="DNSChef is a highly configurable DNS Proxy for Penetration Testers and Malware Analysts. It is capable of fine configuration of which DNS replies to modify or to simply proxy with real responses. In order to take advantage of the tool you must either manually configure or poison DNS server entry to point to DNSChef. The tool requires root privileges to run on privileged ports." )
+    parser = ArgumentParser(usage = "dnschef.py [options]:\n" + genHeader(DNSCHEF_NAME), description="DNSChef is a highly configurable DNS Proxy for Penetration Testers and Malware Analysts. It is capable of fine configuration of which DNS replies to modify or to simply proxy with real responses. In order to take advantage of the tool you must either manually configure or poison DNS server entry to point to DNSChef. The tool requires root privileges to run on privileged ports." )
 
     fakegroup = parser.add_argument_group("Fake DNS records:")
     fakegroup.add_argument('--fakeip', metavar="192.0.2.1", help='IP address to use for matching DNS queries. If you use this parameter without specifying domain names, then all \'A\' queries will be spoofed. Consider using --file argument if you need to define more than one IP address.')
@@ -459,7 +459,7 @@ if __name__ == "__main__":
     fakegroup.add_argument('--fakemail', metavar="mail.fake.com", help='MX name to use for matching DNS queries. If you use this parameter without specifying domain names, then all \'MX\' queries will be spoofed. Consider using --file argument if you need to define more than one MX record.')
     fakegroup.add_argument('--fakealias', metavar="www.fake.com", help='CNAME name to use for matching DNS queries. If you use this parameter without specifying domain names, then all \'CNAME\' queries will be spoofed. Consider using --file argument if you need to define more than one CNAME record.')
     fakegroup.add_argument('--fakens', metavar="ns.fake.com", help='NS name to use for matching DNS queries. If you use this parameter without specifying domain names, then all \'NS\' queries will be spoofed. Consider using --file argument if you need to define more than one NS record.')
-    fakegroup.add_argument('--file', help="Specify a file containing a list of DOMAIN=IP pairs (one pair per line) used for DNS responses. For example: google.com=1.1.1.1 will force all queries to 'google.com' to be resolved to '1.1.1.1'. IPv6 addresses will be automatically detected. You can be even more specific by combining --file with other arguments. However, data obtained from the file will take precedence over others.")
+    fakegroup.add_argument('-f', '--file', action='append', help="Specify a file containing a list of DOMAIN=IP pairs (one pair per line) used for DNS responses. You can use this argument more than once to add multiple files For example: google.com=1.1.1.1 will force all queries to 'google.com' to be resolved to '1.1.1.1'. IPv6 addresses will be automatically detected. You can be even more specific by combining --file with other arguments. However, data obtained from the file will take precedence over others.")
 
     mexclusivegroup = parser.add_mutually_exclusive_group()
     mexclusivegroup.add_argument('--fakedomains', metavar="thesprawl.org,google.com", help='A comma separated list of domain names which will be resolved to FAKE values specified in the the above parameters. All other domain names will be resolved to their true values.')
@@ -473,12 +473,13 @@ if __name__ == "__main__":
     rungroup.add_argument("-6","--ipv6", action="store_true", default=False, help="Run in IPv6 mode.")
     rungroup.add_argument("-p","--port", metavar="53", default="53", help='Port number to listen for DNS requests.')
     rungroup.add_argument("-q", "--quiet", action="store_false", dest="verbose", default=True, help="Don't show headers.")
+    rungroup.add_argument("-l","--logo", default=DNSCHEF_NAME, metavar="text", help='Turns the splash text into your own custom text')
 
     options = parser.parse_args()
-
+    
     # Print program header
     if options.verbose:
-        print(header)
+        print(genHeader(options.logo))
 
     # Main storage of domain filters
     # NOTE: RDMAP is a dictionary map of qtype strings to handling classes
@@ -509,19 +510,24 @@ if __name__ == "__main__":
     if options.nameservers:
         nameservers = options.nameservers.split(',')
         log.info(f"Using the following nameservers: {', '.join(nameservers)}")
-
-    # External file definitions
+    
+    # Import external file definitions recursively
     if options.file:
+        def procFile(file):
+            if os.path.isdir(file):
+                for f in os.listdir(file):
+                    procFile(os.path.join(file,f))
+            else:
+                config.read(file)
         config = ConfigParser()
-        config.read(options.file)
+        for file in options.file:
+            procFile(file)
+        
         for section in config.sections():
-
             if section in nametodns:
                 for domain, record in config.items(section):
-
                     # Make domain case insensitive
                     domain = domain.lower()
-
                     nametodns[section][domain] = record
                     log.info(f"Cooking {section} replies for domain {domain} with '{record}'")
             else:
@@ -539,7 +545,7 @@ if __name__ == "__main__":
         if options.fakedomains:
             for domain in options.fakedomains.split(','):
 
-                # Make domain case insensitive
+                # Make domain case insensitive and get rid of white space
                 domain = domain.lower()
                 domain = domain.strip()
 
@@ -566,7 +572,7 @@ if __name__ == "__main__":
         elif options.truedomains:
             for domain in options.truedomains.split(','):
 
-                # Make domain case insensitive
+                # Make domain case insensitive and get rid of white space
                 domain = domain.lower()
                 domain = domain.strip()
 
