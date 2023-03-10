@@ -26,23 +26,23 @@ Before you can start using DNSChef, you must configure your machine to use a DNS
 
 ### Linux 
 
-Edit `/etc/resolv.conf` to include a line on the very top with your traffic analysis host (e.g add "nameserver 127.0.0.1"  if you are running locally). Alternatively, you can add a DNS server address using tools such as Network Manager. Inside the Network Manager open IPv4 Settings, select `Automatic (DHCP) addresses only` or `Manual` from the `Method` drop down box and edit `DNS Servers` text box to include an IP address with DNSChef running.
+Edit */etc/resolv.conf* to include a line on the very top with your traffic analysis host (e.g add "nameserver 127.0.0.1"  if you are running locally). Alternatively, you can add a DNS server address using tools such as Network Manager. Inside the Network Manager open IPv4 Settings, select *Automatic (DHCP) addresses only* or *Manual* from the *Method* drop down box and edit *DNS Servers* text box to include an IP address with DNSChef running.
 
 ### Windows
 
-Select `Network Connections` from the `Control Panel`. Next select one of the connections (e.g. "Local Area Connection"), right-click on it and select properties. From within a newly appearing dialog box, select `Internet Protocol (TCP/IP)` and click on properties. At last select `Use the following DNS server addresses` radio button and enter the IP address with DNSChef running. For example, if running locally enter `127.0.0.1`.
+Select *Network Connections* from the *Control Panel*. Next select one of the connections (e.g. "Local Area Connection"), right-click on it and select properties. From within a newly appearing dialog box, select *Internet Protocol (TCP/IP)* and click on properties. At last select *Use the following DNS server addresses* radio button and enter the IP address with DNSChef running. For example, if running locally enter *127.0.0.1*.
 
 ### OS X
 
-Open `System Preferences` and click on the `Network` icon. Select the active interface and fill in the `DNS Server` field. If you are using Airport then you will have to click on `Advanced...` button and edit DNS servers from there. Alternatively, you can edit `/etc/resolv.conf` and add a fake nameserver to the very top there (e.g "nameserver 127.0.0.1").
+Open *System Preferences* and click on the *Network* icon. Select the active interface and fill in the *DNS Server* field. If you are using Airport then you will have to click on *Advanced...* button and edit DNS servers from there. Alternatively, you can edit */etc/resolv.conf* and add a fake nameserver to the very top there (e.g "nameserver 127.0.0.1").
 
 ### iOS
 
-Open `Settings` and select `General`. Next select on `Wi-Fi` and click on a blue arrow to the right of an active Access Point from the list. Edit DNS entry to point to the host with DNSChef running. Make sure you have disabled Cellular interface (if available).
+Open *Settings* and select *General*. Next select on *Wi-Fi* and click on a blue arrow to the right of an active Access Point from the list. Edit DNS entry to point to the host with DNSChef running. Make sure you have disabled Cellular interface (if available).
 
 ### Android
 
-Open `Settings` and select `Wireless and network`.  Click on `Wi-Fi settings` and select `Advanced` after pressing the `Options` button on the phone. Enable `Use static IP` checkbox and configure a custom DNS server.
+Open *Settings* and select *Wireless and network*.  Click on *Wi-Fi settings* and select *Advanced* after pressing the *Options* button on the phone. Enable *Use static IP* checkbox and configure a custom DNS server.
 
 If you do not have the ability to modify device's DNS settings manually, then you still have several options involving techniques such as [ARP Spoofing](http://en.wikipedia.org/wiki/ARP_spoofing), [Rogue DHCP](http://www.yersinia.net/doc.htm) and other creative methods.
 
@@ -50,7 +50,7 @@ At last you need to configure a fake service where DNSChef will point all of the
 
 # Running DNSChef
 
-DNSChef is a cross-platform application developed in Python which should run on most platforms which have a Python interpreter. You can use the supplied `dnschef.exe` executable to run it on Windows hosts without installing a Python interpreter. This guide will concentrate on Unix environments; however, all of the examples below were tested to work on Windows as well.
+DNSChef is a cross-platform application developed in Python which should run on most platforms which have a Python interpreter. You can use the supplied *dnschef.exe* executable to run it on Windows hosts without installing a Python interpreter. This guide will concentrate on Unix environments; however, all of the examples below were tested to work on Windows as well.
 
 Let's get a taste of DNSChef with its most basic monitoring functionality. Execute the following command as root (required to start a server on port 53):
 
@@ -85,7 +85,7 @@ DNSChef will print the following log line showing time, source IP address, type 
 
 This mode is useful for simple application monitoring where you need to figure out which domains it uses for its communications.
 
-DNSChef has full support for IPv6 which can be activated using `-6` or `--ipv6` flags. It works exactly as IPv4 mode with the exception that default listening interface is switched to ::1 and default DNS server is switched to 2001:4860:4860::8888. Here is a sample output:
+DNSChef has full support for IPv6 which can be activated using *-6* or *--ipv6* flags. It works exactly as IPv4 mode with the exception that default listening interface is switched to ::1 and default DNS server is switched to 2001:4860:4860::8888. Here is a sample output:
 
 ```
     # ./dnschef.py -6
@@ -106,11 +106,11 @@ DNSChef has full support for IPv6 which can be activated using `-6` or `--ipv6` 
     [00:35:44] ::1: proxying the response of type 'MX' for thesprawl.org
 ```
 
-NOTE: By default, DNSChef creates a UDP listener. You can use TCP instead with the `--tcp` argument discussed later.
+NOTE: By default, DNSChef creates a UDP listener. You can use TCP instead with the *--tcp* argument discussed later.
 
 # Intercept all responses
 
-Now, that you know how to start DNSChef let's configure it to fake all replies to point to 127.0.0.1 using the `--fakeip` parameter:
+Now, that you know how to start DNSChef let's configure it to fake all replies to point to 127.0.0.1 using the *--fakeip* parameter:
 
 ```
     # ./dnschef.py --fakeip 127.0.0.1 -q
@@ -206,7 +206,7 @@ DNS ANY record queries results in DNSChef returning every faked record that it k
 
 # Filtering domains
 
-Using the above example, consider you only want to intercept requests for `thesprawl.org` and leave queries to all other domains such as `webfaction.com` without modification. You can use the `--fakedomains` parameter as illustrated below:
+Using the above example, consider you only want to intercept requests for *thesprawl.org* and leave queries to all other domains such as *webfaction.com* without modification. You can use the *--fakedomains* parameter as illustrated below:
 
 ```
     # ./dnschef.py --fakeip 127.0.0.1 --fakedomains thesprawl.org -q
@@ -217,13 +217,13 @@ Using the above example, consider you only want to intercept requests for `thesp
     [00:23:52] 127.0.0.1: proxying the response of type 'A' for mx9.webfaction.com
 ```
 
-From the above example the request for `thesprawl.org` was faked; however, the request for `mx9.webfaction.com` was left alone. Filtering domains is very useful when you attempt to isolate a single application without breaking the rest.
+From the above example the request for *thesprawl.org* was faked; however, the request for *mx9.webfaction.com* was left alone. Filtering domains is very useful when you attempt to isolate a single application without breaking the rest.
 
 NOTE: DNSChef will not verify whether the domain exists or not before faking the response. If you have specified a domain it will always resolve to a fake value whether it really exists or not.
 
 # Reverse filtering
 
-In another situation you may need to fake responses for all requests except a defined list of domains. You can accomplish this task using the `--truedomains` parameter as follows:
+In another situation you may need to fake responses for all requests except a defined list of domains. You can accomplish this task using the *--truedomains* parameter as follows:
 
 ```
     # ./dnschef.py --fakeip 127.0.0.1 --truedomains thesprawl.org,*.webfaction.com -q
@@ -242,7 +242,7 @@ NOTE: Wildcards are position specific. A mask of type *.thesprawl.org will match
 
 There may be situations where defining a single fake DNS record for all matching domains may not be sufficient. You can use an external file with a collection of DOMAIN=RECORD pairs defining exactly where you want the request to go.
 
-For example, let create the following definitions file and call it `dnschef.ini`:
+For example, let create the following definitions file and call it *dnschef.ini*:
 
 ```
     [A]
@@ -269,7 +269,7 @@ Notice the section header [A], it defines the record type to DNSChef. Now let's 
     [00:45:02] 127.0.0.1: proxying the response of type 'A' for slashdot.org
 ```
 
-Both `google.com` and `www.google.com` matched the `\*.google.com` entry and correctly resolved to `192.0.2.1`. On the other hand `www.thesprawl.org` request was simply proxied instead of being modified. At last all variations of `wordpress.com`, `www.wordpress.org`, etc. matched the `\*.wordpress.\*` mask and correctly resolved to `192.0.2.3`. At last an undefined `slashdot.org` query was simply proxied with a real response.
+Both *google.com* and *www.google.com* matched the *\*.google.com* entry and correctly resolved to *192.0.2.1*. On the other hand *www.thesprawl.org* request was simply proxied instead of being modified. At last all variations of *wordpress.com*, *www.wordpress.org*, etc. matched the *\*.wordpress.\** mask and correctly resolved to *192.0.2.3*. At last an undefined *slashdot.org* query was simply proxied with a real response.
 
 You can specify section headers for all other supported DNS record types including the ones not explicitly exposed on the command line: [A], [AAAA], [MX], [NS], [CNAME], [PTR], [NAPTR] and [SOA]. For example, let's define a new [PTR] section in the 'dnschef.ini' file:
 
@@ -310,7 +310,7 @@ See sample dnschef.ini file for additional examples.
 
 # Advanced Filtering
 
-You can mix and match input from a file and command line. For example the following command uses both `--file` and `--fakedomains` parameters:
+You can mix and match input from a file and command line. For example the following command uses both *--file* and *--fakedomains* parameters:
 
 ```
     # ./dnschef.py --file dnschef.ini --fakeip 6.6.6.6 --fakedomains=thesprawl.org,slashdot.org -q
@@ -327,11 +327,11 @@ You can mix and match input from a file and command line. For example the follow
     [00:50:08] 127.0.0.1: proxying the response of type 'A' for tor.com
 ```
 
-Notice the definition for `thesprawl.org` in the command line parameter took precedence over `dnschef.ini`. This could be useful if you want to override values in the configuration file. slashdot.org still resolves to the fake IP address because it was specified in the `--fakedomains` parameter. tor.com request is simply proxied since it was not specified in either command line or the configuration file.
+Notice the definition for *thesprawl.org* in the command line parameter took precedence over *dnschef.ini*. This could be useful if you want to override values in the configuration file. slashdot.org still resolves to the fake IP address because it was specified in the *--fakedomains* parameter. tor.com request is simply proxied since it was not specified in either command line or the configuration file.
 
 # Other configurations
 
-For security reasons, DNSChef listens on a local 127.0.0.1 (or ::1 for IPv6) interface by default. You can make DNSChef listen on another interface using the `--interface` parameter:
+For security reasons, DNSChef listens on a local 127.0.0.1 (or ::1 for IPv6) interface by default. You can make DNSChef listen on another interface using the *--interface* parameter:
 
 ```
     # ./dnschef.py --interface 0.0.0.0 -q
@@ -352,7 +352,7 @@ or for IPv6:
     [00:57:46] 2001:db8::105: proxying the response of type 'A' for thesprawl.org
 ```
 
-By default, DNSChef uses Google's public DNS server to make proxy requests. However, you can define a custom list of nameservers using the `--nameservers` parameter:
+By default, DNSChef uses Google's public DNS server to make proxy requests. However, you can define a custom list of nameservers using the *--nameservers* parameter:
 
 ```
     # ./dnschef.py --nameservers 4.2.2.1,4.2.2.2 -q
@@ -372,7 +372,7 @@ It is possible to specify non-standard nameserver port using IP#PORT notation:
     [02:03:12] 127.0.0.1: proxying the response of type 'A' for thesprawl.org
 ```
 
-At the same time it is possible to start DNSChef itself on an alternative port using the `-p port#` parameter:
+At the same time it is possible to start DNSChef itself on an alternative port using the *-p port#* parameter:
 
 ```
     # ./dnschef.py -p 5353 -q
@@ -382,7 +382,7 @@ At the same time it is possible to start DNSChef itself on an alternative port u
     [*] No parameters were specified. Running in full proxy mode
 ```
 
-DNS protocol can be used over UDP (default) or TCP. DNSChef implements a TCP mode which can be activated with the `--tcp` flag.
+DNS protocol can be used over UDP (default) or TCP. DNSChef implements a TCP mode which can be activated with the *--tcp* flag.
 
 # Internal architecture
 
@@ -390,7 +390,7 @@ Here is some information on the internals in case you need to adapt the tool for
 
 The excellent [dnslib library](https://bitbucket.org/paulc/dnslib/wiki/Home) is used to dissect and reassemble DNS packets. It is particularly useful when generating response packets based on queries.
 
-DNSChef is capable of modifing queries for records of type "A", "AAAA", "MX", "CNAME", "NS", "TXT", "PTR", "NAPTR", "SOA", "ANY". It is very easy to expand or modify behavior for any record. Simply add another **if qtype == "RECORD TYPE")** entry and tell it what to reply with.
+DNSChef is capable of modifing queries for records of type "A", "AAAA", "MX", "CNAME", "NS", "TXT", "PTR", "NAPTR", "SOA", "ANY". It is very easy to expand or modify behavior for any record. Simply add another *if qtype == "RECORD TYPE")* entry and tell it what to reply with.
 
 Enjoy the tool and forward all requests and comments to iphelix [at] thesprawl.org.
 
