@@ -8,7 +8,7 @@ The use of DNS Proxy is recommended in situations where it is not possible to fo
 
 ### What this fork adds
 
-* Added support for importing multible files and importing directories recursively
+* Added support for importing multible files and importing directories recursively (Use *dnschef.py -f list* to import the entire directory called "list")
 
 * Made small changes to the documentation to work better with Markdown
 
