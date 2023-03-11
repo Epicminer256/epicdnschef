@@ -58,6 +58,8 @@ import binascii
 import string
 import base64
 
+# You shouldn't need to change this debug code here, instead pass -d as a argument
+debug = False
 
 class DNSChefFormatter(logging.Formatter):
 
@@ -135,7 +137,13 @@ class DNSHandler():
                     # IPv6 needs additional work before inclusion:
                     if qtype == "AAAA":
                         ipv6_hex_tuple = list(map(int, ip_address(fake_record).packed))
-                        response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](ipv6_hex_tuple)))
+                        try:
+                            response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](ipv6_hex_tuple)))
+                        except Exception as e:
+                            if debug == True:
+                                log.error(f"[!] Could not proxy request: {e}")
+                            else:
+                                log.error("[!] Could not proxy request")
 
                     elif qtype == "SOA":
                         mname,rname,t1,t2,t3,t4,t5 = fake_record.split(" ")
@@ -144,8 +152,13 @@ class DNSHandler():
                         # dnslib doesn't like trailing dots
                         if mname[-1] == ".": mname = mname[:-1]
                         if rname[-1] == ".": rname = rname[:-1]
-
-                        response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](mname,rname,times)))
+                        try:
+                            response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](mname,rname,times)))
+                        except Exception as e:
+                            if debug == True:
+                                log.error(f"[!] Could not proxy request: {e}")
+                            else:
+                                log.error("[!] Could not proxy request")
 
                     elif qtype == "NAPTR":
                         order,preference,flags,service,regexp,replacement = list(map(lambda x: x.encode(), fake_record.split(" ")))
@@ -154,27 +167,40 @@ class DNSHandler():
 
                         # dnslib doesn't like trailing dots
                         if replacement[-1] == ".": replacement = replacement[:-1]
-
-                        response.add_answer( RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](order,preference,flags,service,regexp,DNSLabel(replacement))) )
-
+                        try:
+                            response.add_answer( RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](order,preference,flags,service,regexp,DNSLabel(replacement))) )
+                        except Exception as e:
+                            if debug == True:
+                                log.error(f"[!] Could not proxy request: {e}")
+                            else:
+                                log.error("[!] Could not proxy request")
+                        
                     elif qtype == "SRV":
                         priority, weight, port, target = fake_record.split(" ")
                         priority = int(priority)
                         weight = int(weight)
                         port = int(port)
                         if target[-1] == ".": target = target[:-1]
-
-                        response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](priority, weight, port, target) ))
-
+                        try:
+                            response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](priority, weight, port, target) ))
+                        except Exception as e:
+                            if debug == True:
+                                log.error(f"[!] Could not proxy request: {e}")
+                            else:
+                                log.error("[!] Could not proxy request")
                     elif qtype == "DNSKEY":
                         flags, protocol, algorithm, key = fake_record.split(" ")
                         flags = int(flags)
                         protocol = int(protocol)
                         algorithm = int(algorithm)
                         key = base64.b64decode(("".join(key)).encode('ascii'))
-
-                        response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](flags, protocol, algorithm, key) ))
-
+                        try:
+                            response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](flags, protocol, algorithm, key) ))
+                        except Exception as e:
+                            if debug == True:
+                                log.error(f"[!] Could not proxy request: {e}")
+                            else:
+                                log.error("[!] Could not proxy request")
                     elif qtype == "RRSIG":
                         covered, algorithm, labels, orig_ttl, sig_exp, sig_inc, key_tag, name, sig = fake_record.split(" ")
                         covered = getattr(QTYPE,covered) # NOTE: Covered QTYPE
@@ -186,13 +212,23 @@ class DNSHandler():
                         key_tag = int(key_tag)
                         if name[-1] == '.': name = name[:-1]
                         sig = base64.b64decode(("".join(sig)).encode('ascii'))
-
-                        response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](covered, algorithm, labels,orig_ttl, sig_exp, sig_inc, key_tag, name, sig) ))
-
+                        try:
+                            response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](covered, algorithm, labels,orig_ttl, sig_exp, sig_inc, key_tag, name, sig) ))
+                        except Exception as e:
+                            if debug == True:
+                                log.error(f"[!] Could not proxy request: {e}")
+                            else:
+                                log.error("[!] Could not proxy request")
                     else:
                         # dnslib doesn't like trailing dots
                         if fake_record[-1] == ".": fake_record = fake_record[:-1]
-                        response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](fake_record)))
+                        try:
+                            response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](fake_record)))
+                        except Exception as e:
+                            if debug == True:
+                                log.error(f"[!] Could not proxy request: {e}")
+                            else:
+                                log.error("[!] Could not proxy request")
 
                     response = response.pack()
 
@@ -216,9 +252,13 @@ class DNSHandler():
                                 # dnslib doesn't like trailing dots
                                 if mname[-1] == ".": mname = mname[:-1]
                                 if rname[-1] == ".": rname = rname[:-1]
-
-                                response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](mname,rname,times)))
-
+                                try:
+                                    response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](mname,rname,times)))
+                                except Exception as e:
+                                    if debug == True:
+                                        log.error(f"[!] Could not proxy request: {e}")
+                                    else:
+                                        log.error("[!] Could not proxy request")
                             elif qtype == "NAPTR":
                                 order,preference,flags,service,regexp,replacement = fake_record.split(" ")
                                 order = int(order)
@@ -226,8 +266,13 @@ class DNSHandler():
 
                                 # dnslib doesn't like trailing dots
                                 if replacement and replacement[-1] == ".": replacement = replacement[:-1]
-
-                                response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](order,preference,flags,service,regexp,replacement)))
+                                try:
+                                    response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](order,preference,flags,service,regexp,replacement)))
+                                except Exception as e:
+                                    if debug == True:
+                                        log.error(f"[!] Could not proxy request: {e}")
+                                    else:
+                                        log.error("[!] Could not proxy request")
 
                             elif qtype == "SRV":
                                 priority, weight, port, target = fake_record.split(" ")
@@ -235,8 +280,13 @@ class DNSHandler():
                                 weight = int(weight)
                                 port = int(port)
                                 if target[-1] == ".": target = target[:-1]
-
-                                response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](priority, weight, port, target) ))
+                                try:
+                                    response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](priority, weight, port, target) ))
+                                except Exception as e:
+                                    if debug == True:
+                                        log.error(f"[!] Could not proxy request: {e}")
+                                    else:
+                                        log.error("[!] Could not proxy request")
 
                             elif qtype == "DNSKEY":
                                 flags, protocol, algorithm, key = fake_record.split(" ")
@@ -244,8 +294,13 @@ class DNSHandler():
                                 protocol = int(protocol)
                                 algorithm = int(algorithm)
                                 key = base64.b64decode(("".join(key)).encode('ascii'))
-
-                                response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](flags, protocol, algorithm, key) ))
+                                try:
+                                    response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](flags, protocol, algorithm, key) ))
+                                except Exception as e:
+                                    if debug == True:
+                                        log.error(f"[!] Could not proxy request: {e}")
+                                    else:
+                                        log.error("[!] Could not proxy request")
 
                             elif qtype == "RRSIG":
                                 covered, algorithm, labels, orig_ttl, sig_exp, sig_inc, key_tag, name, sig = fake_record.split(" ")
@@ -258,13 +313,24 @@ class DNSHandler():
                                 key_tag = int(key_tag)
                                 if name[-1] == '.': name = name[:-1]
                                 sig = base64.b64decode(("".join(sig)).encode('ascii'))
-
-                                response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](covered, algorithm, labels,orig_ttl, sig_exp, sig_inc, key_tag, name, sig) ))
+                                try:
+                                    response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](covered, algorithm, labels,orig_ttl, sig_exp, sig_inc, key_tag, name, sig) ))
+                                except Exception as e:
+                                    if debug == True:
+                                        log.error(f"[!] Could not proxy request: {e}")
+                                    else:
+                                        log.error("[!] Could not proxy request")
 
                             else:
                                 # dnslib doesn't like trailing dots
                                 if fake_record[-1] == ".": fake_record = fake_record[:-1]
-                                response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](fake_record)))
+                                try:
+                                    response.add_answer(RR(qname, getattr(QTYPE,qtype), rdata=RDMAP[qtype](fake_record)))
+                                except Exception as e:
+                                    if debug == True:
+                                        log.error(f"[!] Could not proxy request: {e}")
+                                    else:
+                                        log.error("[!] Could not proxy request")
 
                     response = response.pack()
 
@@ -350,13 +416,15 @@ class DNSHandler():
                 sock.close()
 
         except Exception as e:
-            log.error(f"[!] Could not proxy request: {e}")
+            if debug == True:
+                log.error(f"[!] Could not proxy request: {e}")
+            else:
+                log.error("[!] Could not proxy request")
         else:
             return reply
 
 # UDP DNS Handler for incoming requests
 class UDPHandler(DNSHandler, socketserver.BaseRequestHandler):
-
     def handle(self):
         (data, socket) = self.request
         response = self.parse(data)
@@ -473,9 +541,12 @@ if __name__ == "__main__":
     rungroup.add_argument("-6","--ipv6", action="store_true", default=False, help="Run in IPv6 mode.")
     rungroup.add_argument("-p","--port", metavar="53", default="53", help='Port number to listen for DNS requests.')
     rungroup.add_argument("-q", "--quiet", action="store_false", dest="verbose", default=True, help="Don't show headers.")
+    rungroup.add_argument("-d", "--debug", action="store_true", dest="debug", default=False, help="Show error messages.")
     rungroup.add_argument("-l","--logo", default=DNSCHEF_NAME, metavar="text", help='Turns the splash text into your own custom text')
 
     options = parser.parse_args()
+    
+    debug = options.debug
     
     # Print program header
     if options.verbose:

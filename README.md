@@ -14,6 +14,8 @@ The use of DNS Proxy is recommended in situations where it is not possible to fo
 
 * Put in a new logo with the ability to pass a custom program title
 
+* Hides DNS errors by default (*-d* to show)
+
 ### To do
 
 * Update documentation 
